@@ -18,6 +18,7 @@ Three files: `index.html` (DOM + canvases), `style.css`, and `game.js` (all logi
 - **Board**: `ROWS × COLS` matrix of `0` or a piece-type index 1–12 (1–7 standard, 8–10 pentominoes +/U/Y, 11 single 1×1 awarded for the next spawn after a Tetris via `rewardPending`, 12 hollow 3×3). `randomPiece` rolls the special types by chance; `makePiece(type)` builds any piece. That same index keys into both `COLORS` and `PIECES` (index 0 is `null` in each), and shape cells hold their own type index, so they can be merged into the board directly.
 - **Flow**: `loop` (rAF) → gravity → `lockPiece` (`merge` → `clearLines` → `spawn`). `spawn` calls `endGame` if the new piece collides immediately. Soft drop, hard drop and keyboard input all funnel through the same `collide`/`lockPiece` path.
 - **Pause/game over** both cancel the rAF loop (`cancelAnimationFrame(animId)`) and reuse the same `#overlay` element; resuming restarts `loop` manually.
+- **Menú de pausa**: P/Escape abren `#pause-menu` dentro de `#overlay` (Reanudar, Reiniciar, Ver controles, Nivel inicial). `startLevel` vive fuera de `init()` y `init()` lo usa para `level`/`dropInterval`. En pausa el handler de teclado solo deja pasar P/Escape (sin `e.repeat`).
 - **Rotation**: `rotateCW` plus a simple kick list `[0,-1,1,-2,2]` in `tryRotate` (horizontal only, not SRS).
 
 ## Gotchas
