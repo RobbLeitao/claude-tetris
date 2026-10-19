@@ -75,7 +75,7 @@ jobs:
                - Tipo (elige exactamente 1): `bug`, `enhancement`, `question`, `documentation`
                - Área (elige 1 o 2): `area: gameplay`, `area: rendering`, `area: controls`, `area: ui`, `area: scoring`
                - Prioridad (elige exactamente 1): `priority: high`, `priority: medium`, `priority: low`
-            4. Escribe `${{ runner.temp }}/triage/diagnosis.md` EN ESPAÑOL, con esta estructura y sin texto adicional fuera de ella:
+            4. Escribe `${{ runner.temp }}/triage/diagnosis.md` EN ESPAÑOL, con esta estructura y sin texto adicional fuera de ella. Todo el contenido debe estar en formato Markdown que GitHub entienda (GitHub Flavored Markdown): encabezados con `#`, listas con `-` o `1.`, código en línea con comillas invertidas, bloques de código con triple comilla invertida y lenguaje (p. ej. ```js), y listas de tareas con `- [ ]` cuando corresponda:
 
                ## 🔍 Diagnóstico automático
 
