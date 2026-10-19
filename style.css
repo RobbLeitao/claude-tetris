@@ -19,7 +19,7 @@
   --kbd-bg: #22223a;
   --kbd-border: #3a3a5a;
   --kbd-text: #aaa;
-  --overlay-bg: var(--overlay-bg);
+  --overlay-bg: rgba(10, 10, 20, 0.75);
   --shadow: rgba(0, 0, 0, 0.6);
   --grid: #22222e;
   --shine: rgba(255, 255, 255, 0.12);
