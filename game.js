@@ -13,7 +13,18 @@ const COLORS = [
   '#e57373', // Z - red
   '#90caf9', // J - azul pálido
   '#ffb74d', // L - orange
+  '#f06292', // + - rosa
+  '#a1887f', // U - marrón
+  '#aed581', // Y - lima
+  '#ffffff', // 1x1 - blanco
+  '#78909c', // 3x3 hueca - gris acero
 ];
+
+const SINGLE = 11;
+const HOLLOW = 12;
+const PENTOMINOES = [8, 9, 10];
+const PENTOMINO_CHANCE = 0.10;
+const HOLLOW_CHANCE = 0.03;
 
 const PIECES = [
   null,
@@ -24,6 +35,11 @@ const PIECES = [
   [[5,5,0],[0,5,5],[0,0,0]],                  // Z
   [[6,0,0],[6,6,6],[0,0,0]],                  // J
   [[0,0,7],[7,7,7],[0,0,0]],                  // L
+  [[0,8,0],[8,8,8],[0,8,0]],                  // + (pentominó)
+  [[9,0,9],[9,9,9],[0,0,0]],                  // U (pentominó)
+  [[0,10,0,0],[10,10,10,10],[0,0,0,0],[0,0,0,0]], // Y (pentominó)
+  [[11]],                                      // 1x1 (recompensa)
+  [[12,12,12],[12,0,12],[12,12,12]],          // 3x3 hueca (reto)
 ];
 
 const LIGHT_COLORS = [
@@ -35,6 +51,11 @@ const LIGHT_COLORS = [
   '#e53935', // Z
   '#1e72d6', // J
   '#ef6c00', // L
+  '#d81b60', // +
+  '#6d4c41', // U
+  '#7cb342', // Y
+  '#455a64', // 1x1
+  '#37474f', // 3x3 hueca
 ];
 
 const LINE_SCORES = [0, 100, 300, 500, 800];
@@ -52,7 +73,7 @@ const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 const themeBtn = document.getElementById('theme-toggle');
 
-let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
+let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId, rewardPending;
 
 // El tema vive fuera de init() para que Reiniciar lo conserve
 let theme = 'dark';
@@ -63,7 +84,16 @@ function createBoard() {
 }
 
 function randomPiece() {
-  const type = Math.floor(Math.random() * 7) + 1;
+  const roll = Math.random();
+  let type;
+  if (roll < HOLLOW_CHANCE) type = HOLLOW;
+  else if (roll < HOLLOW_CHANCE + PENTOMINO_CHANCE)
+    type = PENTOMINOES[Math.floor(Math.random() * PENTOMINOES.length)];
+  else type = Math.floor(Math.random() * 7) + 1;
+  return makePiece(type);
+}
+
+function makePiece(type) {
   const shape = PIECES[type].map(row => [...row]);
   return { type, shape, x: Math.floor(COLS / 2) - Math.floor(shape[0].length / 2), y: 0 };
 }
@@ -120,6 +150,7 @@ function clearLines() {
     }
   }
   if (cleared) {
+    if (cleared === 4) rewardPending = true;
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
     level = Math.floor(lines / 10) + 1;
@@ -159,7 +190,8 @@ function lockPiece() {
 
 function spawn() {
   current = next;
-  next = randomPiece();
+  next = rewardPending ? makePiece(SINGLE) : randomPiece();
+  rewardPending = false;
   if (collide(current.shape, current.x, current.y)) {
     endGame();
   }
@@ -297,6 +329,7 @@ function init() {
   gameOver = false;
   dropInterval = 1000;
   dropAccum = 0;
+  rewardPending = false;
   lastTime = performance.now();
   next = randomPiece();
   spawn();

@@ -15,7 +15,7 @@ Open `index.html` directly, or serve statically (e.g. `python -m http.server 800
 Three files: `index.html` (DOM + canvases), `style.css`, and `game.js` (all logic, loaded as a plain script with `'use strict'`; everything is module-level globals).
 
 - **Global mutable state** in `game.js` (`board`, `current`, `next`, `score`, `lines`, `level`, `paused`, `gameOver`, `dropInterval`, `dropAccum`, `animId`…) is declared in one `let` and reset by `init()`. The restart button calls `init()` again, so any new state must be reset there.
-- **Board**: `ROWS × COLS` matrix of `0` or a piece-type index 1–7. That same index keys into both `COLORS` and `PIECES` (index 0 is `null` in each), and shape cells hold their own type index, so they can be merged into the board directly.
+- **Board**: `ROWS × COLS` matrix of `0` or a piece-type index 1–12 (1–7 standard, 8–10 pentominoes +/U/Y, 11 single 1×1 awarded for the next spawn after a Tetris via `rewardPending`, 12 hollow 3×3). `randomPiece` rolls the special types by chance; `makePiece(type)` builds any piece. That same index keys into both `COLORS` and `PIECES` (index 0 is `null` in each), and shape cells hold their own type index, so they can be merged into the board directly.
 - **Flow**: `loop` (rAF) → gravity → `lockPiece` (`merge` → `clearLines` → `spawn`). `spawn` calls `endGame` if the new piece collides immediately. Soft drop, hard drop and keyboard input all funnel through the same `collide`/`lockPiece` path.
 - **Pause/game over** both cancel the rAF loop (`cancelAnimationFrame(animId)`) and reuse the same `#overlay` element; resuming restarts `loop` manually.
 - **Rotation**: `rotateCW` plus a simple kick list `[0,-1,1,-2,2]` in `tryRotate` (horizontal only, not SRS).
