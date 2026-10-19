@@ -26,6 +26,17 @@ const PIECES = [
   [[0,0,7],[7,7,7],[0,0,0]],                  // L
 ];
 
+const LIGHT_COLORS = [
+  null,
+  '#00acc1', // I
+  '#f9a825', // O
+  '#8e24aa', // T
+  '#43a047', // S
+  '#e53935', // Z
+  '#1e72d6', // J
+  '#ef6c00', // L
+];
+
 const LINE_SCORES = [0, 100, 300, 500, 800];
 
 const canvas = document.getElementById('board');
@@ -39,8 +50,13 @@ const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
+const themeBtn = document.getElementById('theme-toggle');
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
+
+// El tema vive fuera de init() para que Reiniciar lo conserve
+let theme = 'dark';
+let gridColor, shineColor;
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -158,18 +174,18 @@ function updateHUD() {
 
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
-  const color = COLORS[colorIndex];
+  const color = (theme === 'light' ? LIGHT_COLORS : COLORS)[colorIndex];
   context.globalAlpha = alpha ?? 1;
   context.fillStyle = color;
   context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
   // highlight
-  context.fillStyle = 'rgba(255,255,255,0.12)';
+  context.fillStyle = shineColor;
   context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
   context.globalAlpha = 1;
 }
 
 function drawGrid() {
-  ctx.strokeStyle = '#22222e';
+  ctx.strokeStyle = gridColor;
   ctx.lineWidth = 0.5;
   for (let c = 1; c < COLS; c++) {
     ctx.beginPath();
@@ -256,6 +272,19 @@ function loop(ts) {
   animId = requestAnimationFrame(loop);
 }
 
+function setTheme(value) {
+  theme = value === 'light' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = theme;
+  const style = getComputedStyle(document.documentElement);
+  gridColor = style.getPropertyValue('--grid').trim();
+  shineColor = style.getPropertyValue('--shine').trim();
+  themeBtn.textContent = theme === 'light' ? 'Modo oscuro' : 'Modo claro';
+  themeBtn.setAttribute('aria-pressed', String(theme === 'light'));
+  try { localStorage.setItem('tetris-theme', theme); } catch (e) {}
+  // En pausa o game over el rAF está cancelado: forzar redibujado
+  if (current && next) { draw(); drawNext(); }
+}
+
 function init() {
   board = createBoard();
   score = 0;
@@ -301,4 +330,12 @@ document.addEventListener('keydown', e => {
 
 restartBtn.addEventListener('click', init);
 
+themeBtn.addEventListener('click', () => {
+  setTheme(theme === 'light' ? 'dark' : 'light');
+  themeBtn.blur(); // evita que Space reactive el botón
+});
+
+let savedTheme = 'dark';
+try { savedTheme = localStorage.getItem('tetris-theme') || 'dark'; } catch (e) {}
+setTheme(savedTheme);
 init();
