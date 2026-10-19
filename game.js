@@ -241,6 +241,7 @@ function togglePause() {
 }
 
 function loop(ts) {
+  if (gameOver || paused) return;
   const dt = ts - lastTime;
   lastTime = ts;
   dropAccum += dt;
@@ -253,6 +254,8 @@ function loop(ts) {
     }
   }
   draw();
+  // endGame() se llamó desde dentro de este frame: no hay frame pendiente que cancelar
+  if (gameOver) return;
   animId = requestAnimationFrame(loop);
 }
 
