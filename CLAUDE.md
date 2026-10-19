@@ -20,6 +20,8 @@ Three files: `index.html` (DOM + canvases), `style.css`, and `game.js` (all logi
 - **Pause/game over** both cancel the rAF loop (`cancelAnimationFrame(animId)`) and reuse the same `#overlay` element; resuming restarts `loop` manually.
 - **Rotation**: `rotateCW` plus a simple kick list `[0,-1,1,-2,2]` in `tryRotate` (horizontal only, not SRS).
 
+- **Records**: top 5 `{name,score,lines,combo}` + `bestCombo`/`maxLines` in localStorage key `tetris-records` (`records`, `loadRecords`/`saveRecords`/`renderRecords`; all try/catch). The game no longer auto-starts: `#start-screen` shows the table and its Jugar button calls `init()`. `endGame` calls `showGameOverRecords` (name form if score qualifies). `combo`/`maxCombo` (consecutive locks that clear lines) are reset in `init()`. The keydown handler ignores events from inputs and while the start screen is visible.
+
 ## Gotchas
 
 - Canvas size is hard-coded in `index.html` (`#board` 300×600, `#next-canvas` 120×120). Changing `COLS`, `ROWS` or `BLOCK` in `game.js` requires updating the canvas `width`/`height` to `COLS*BLOCK` × `ROWS*BLOCK`.

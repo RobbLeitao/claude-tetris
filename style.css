@@ -201,6 +201,134 @@ kbd {
   background: var(--accent-hover);
 }
 
+/* ---- Records ---- */
+.hidden {
+  display: none;
+}
+
+.start-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 6px;
+  color: var(--accent);
+}
+
+#start-btn,
+#save-record-btn,
+#reset-records-btn {
+  background: var(--accent);
+  color: var(--accent-text);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#start-btn {
+  padding: 10px 28px;
+  font-size: 14px;
+}
+
+#reset-records-btn {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+#reset-records-btn:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.records {
+  width: 250px;
+  font-size: 12px;
+  color: var(--text);
+  text-align: center;
+}
+
+.records h3 {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--label);
+  margin-bottom: 6px;
+}
+
+.records table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.records th {
+  font-size: 10px;
+  color: var(--label);
+  font-weight: 600;
+  text-align: right;
+  padding: 2px 4px;
+}
+
+.records td {
+  padding: 3px 4px;
+  text-align: right;
+}
+
+.records th:nth-child(2),
+.records td:nth-child(2) {
+  text-align: left;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.records tr.highlight td {
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 700;
+}
+
+.records .stats {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.name-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.name-entry.hidden,
+#gameover-records.hidden {
+  display: none;
+}
+
+.name-row {
+  display: flex;
+  gap: 6px;
+}
+
+.name-row input {
+  width: 120px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-bg);
+  color: var(--text);
+  user-select: text;
+}
+
 /* ---- Interruptor de tema ---- */
 #theme-toggle {
   position: fixed;
