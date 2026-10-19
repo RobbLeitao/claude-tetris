@@ -219,3 +219,69 @@ kbd {
 #theme-toggle:hover {
   border-color: var(--accent);
 }
+
+/* ---- Selector de skin ---- */
+#skin-select {
+  position: fixed;
+  top: 56px;
+  right: 16px;
+  background: var(--panel-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#skin-select:hover {
+  border-color: var(--accent);
+}
+
+/* ---- Skins: fondo de los canvas y variables de dibujo ---- */
+[data-skin="neon"] {
+  --grid: #14141f;
+}
+
+[data-skin="neon"] #board,
+[data-skin="neon"] #next-canvas {
+  background: #000;
+  border-color: #1d3a4a;
+}
+
+[data-skin="neon"] #board {
+  box-shadow: 0 0 24px rgba(77, 208, 225, 0.35);
+}
+
+[data-skin="pastel"] #board,
+[data-skin="pastel"] #next-canvas {
+  background: #2a2438;
+  border-radius: 14px;
+}
+
+[data-theme="light"][data-skin="pastel"] #board,
+[data-theme="light"][data-skin="pastel"] #next-canvas {
+  background: #fdf6fb;
+}
+
+[data-skin="pastel"] {
+  --grid: rgba(255, 255, 255, 0.07);
+}
+
+[data-theme="light"][data-skin="pastel"] {
+  --grid: rgba(120, 100, 140, 0.12);
+}
+
+[data-skin="pixel"] #board,
+[data-skin="pixel"] #next-canvas {
+  border-radius: 0;
+  border-width: 3px;
+  background: #101018;
+  image-rendering: pixelated;
+}
+
+[data-theme="light"][data-skin="pixel"] #board,
+[data-theme="light"][data-skin="pixel"] #next-canvas {
+  background: #dfe2ec;
+}

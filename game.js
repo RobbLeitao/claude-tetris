@@ -204,8 +204,105 @@ function updateHUD() {
   levelEl.textContent = level;
 }
 
+// ---- Skins ----
+// Cada skin define su paleta (por tema claro/oscuro) y su función de dibujo.
+// El estado de la skin vive fuera de init() para que Reiniciar lo conserve.
+const PASTEL_DARK = [
+  null, '#a8e6ef', '#fff1b8', '#e1bee7', '#c8e6c9', '#ffb3b3', '#bbdefb',
+  '#ffe0b2', '#f8bbd0', '#d7ccc8', '#dcedc8', '#ffffff', '#b0bec5',
+];
+const PASTEL_LIGHT = [
+  null, '#7fd3df', '#f7dc7a', '#cf9bd8', '#9fd3a2', '#f19a9a', '#8fbdea',
+  '#f5c27d', '#ee8fb0', '#bfa89f', '#b5d98a', '#90a4ae', '#8fa3ad',
+];
+
+function drawBlockNeon(context, x, y, colorIndex, size, a) {
+  const color = COLORS[colorIndex]; // colores vivos en ambos temas: el fondo siempre es negro
+  const px = x * size + 2, py = y * size + 2, s = size - 4;
+  context.save();
+  context.globalAlpha = a;
+  context.shadowColor = color;
+  context.shadowBlur = 14 * a;
+  context.strokeStyle = color;
+  context.lineWidth = 2;
+  context.strokeRect(px, py, s, s);
+  context.fillStyle = color;
+  context.globalAlpha = a * 0.28;
+  context.fillRect(px, py, s, s);
+  context.restore(); // restaura shadowBlur/shadowColor/globalAlpha
+}
+
+function roundedRectPath(context, x, y, w, h, r) {
+  context.beginPath();
+  context.moveTo(x + r, y);
+  context.arcTo(x + w, y, x + w, y + h, r);
+  context.arcTo(x + w, y + h, x, y + h, r);
+  context.arcTo(x, y + h, x, y, r);
+  context.arcTo(x, y, x + w, y, r);
+  context.closePath();
+}
+
+function drawBlockPastel(context, x, y, colorIndex, size, a) {
+  const color = (theme === 'light' ? PASTEL_LIGHT : PASTEL_DARK)[colorIndex];
+  const px = x * size + 2, py = y * size + 2, s = size - 4;
+  context.save();
+  context.globalAlpha = a;
+  roundedRectPath(context, px, py, s, s, size * 0.28);
+  context.fillStyle = color;
+  context.fill();
+  context.lineWidth = 1;
+  context.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+  context.stroke();
+  // brillo suave
+  roundedRectPath(context, px + s * 0.18, py + s * 0.14, s * 0.64, s * 0.2, s * 0.1);
+  context.fillStyle = 'rgba(255, 255, 255, 0.45)';
+  context.fill();
+  context.restore();
+}
+
+function drawBlockPixel(context, x, y, colorIndex, size, a) {
+  const color = (theme === 'light' ? LIGHT_COLORS : COLORS)[colorIndex];
+  const u = size / 6; // 6x6 "píxeles" por bloque
+  const px = x * size, py = y * size;
+  context.save();
+  context.globalAlpha = a;
+  context.fillStyle = color;
+  context.fillRect(px, py, size, size);
+  // borde oscuro de 1 píxel
+  context.fillStyle = 'rgba(0, 0, 0, 0.55)';
+  context.fillRect(px, py, size, u);
+  context.fillRect(px, py + size - u, size, u);
+  context.fillRect(px, py, u, size);
+  context.fillRect(px + size - u, py, u, size);
+  // luz arriba/izquierda y sombra abajo/derecha
+  context.fillStyle = 'rgba(255, 255, 255, 0.45)';
+  context.fillRect(px + u, py + u, size - 3 * u, u);
+  context.fillRect(px + u, py + u, u, size - 3 * u);
+  context.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  context.fillRect(px + u, py + size - 2 * u, size - 2 * u, u);
+  context.fillRect(px + size - 2 * u, py + u, u, size - 2 * u);
+  // dither en tablero de ajedrez en el interior
+  context.fillStyle = 'rgba(0, 0, 0, 0.18)';
+  for (let i = 2; i < 4; i++)
+    for (let j = 2; j < 4; j++)
+      if ((i + j) % 2 === 0) context.fillRect(px + i * u, py + j * u, u, u);
+  context.restore();
+}
+
+const SKINS = {
+  retro:  { label: 'Retro',      background: null },
+  neon:   { label: 'Neón',       draw: drawBlockNeon },
+  pastel: { label: 'Pastel',     draw: drawBlockPastel },
+  pixel:  { label: 'Pixel art',  draw: drawBlockPixel },
+};
+let skin = 'retro';
+
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
+  if (SKINS[skin].draw) {
+    SKINS[skin].draw(context, x, y, colorIndex, size, alpha ?? 1);
+    return;
+  }
   const color = (theme === 'light' ? LIGHT_COLORS : COLORS)[colorIndex];
   context.globalAlpha = alpha ?? 1;
   context.fillStyle = color;
@@ -340,6 +437,7 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
+  if (e.target === skinSelect) return; // las flechas manejan el selector, no la pieza
   if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
@@ -370,6 +468,29 @@ themeBtn.addEventListener('click', () => {
   setTheme(theme === 'light' ? 'dark' : 'light');
   themeBtn.blur(); // evita que Space reactive el botón
 });
+
+const skinSelect = document.getElementById('skin-select');
+
+function setSkin(value) {
+  skin = SKINS[value] ? value : 'retro';
+  document.documentElement.dataset.skin = skin;
+  // la skin puede redefinir --grid / --shine en CSS
+  const style = getComputedStyle(document.documentElement);
+  gridColor = style.getPropertyValue('--grid').trim();
+  shineColor = style.getPropertyValue('--shine').trim();
+  skinSelect.value = skin;
+  try { localStorage.setItem('tetris-skin', skin); } catch (e) {}
+  if (current && next) { draw(); drawNext(); }
+}
+
+skinSelect.addEventListener('change', () => {
+  setSkin(skinSelect.value);
+  skinSelect.blur(); // evita que Space cambie la selección
+});
+
+let savedSkin = 'retro';
+try { savedSkin = localStorage.getItem('tetris-skin') || 'retro'; } catch (e) {}
+setSkin(savedSkin);
 
 let savedTheme = 'dark';
 try { savedTheme = localStorage.getItem('tetris-theme') || 'dark'; } catch (e) {}
